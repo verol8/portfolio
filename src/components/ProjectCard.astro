@@ -1,0 +1,81 @@
+---
+import path from "node:path";
+import type { CollectionEntry } from "astro:content";
+import I18nKey from "@i18n/i18nKey";
+import { i18n } from "@i18n/translation";
+import { getDir, getProjectUrlBySlug } from "@utils/url-utils";
+import { Icon } from "astro-icon/components";
+import ImageWrapper from "./misc/ImageWrapper.astro";
+
+interface Props {
+	entry: CollectionEntry<"projects">;
+}
+
+const { entry } = Astro.props;
+const { title, description, image, tags, demo, repo, featured } = entry.data;
+const href = getProjectUrlBySlug(entry.slug);
+const hasCover = image !== "";
+---
+<article class="card-base flex flex-col overflow-hidden rounded-[var(--radius-large)] h-full">
+    <!-- cover -->
+    <a href={href} aria-label={title} class="group relative block aspect-[16/9] overflow-hidden">
+        {hasCover ? (
+            <ImageWrapper
+                src={image}
+                basePath={path.join("content/projects/", getDir(entry.id))}
+                alt={title}
+                class="w-full h-full transition duration-300 group-hover:scale-105"
+            />
+        ) : (
+            <div class="w-full h-full flex items-center justify-center transition duration-300 group-hover:scale-105"
+                 style="background: linear-gradient(135deg, oklch(0.75 0.14 var(--hue)), oklch(0.5 0.14 var(--hue)));">
+                <Icon name="material-symbols:code-rounded" class="text-white/70 text-6xl" />
+            </div>
+        )}
+        {featured && (
+            <div class="absolute top-3 left-3 z-10 h-7 w-7 rounded-lg bg-black/50 flex items-center justify-center">
+                <Icon name="material-symbols:star-rounded" class="text-yellow-300 text-lg" />
+            </div>
+        )}
+    </a>
+
+    <div class="flex flex-col flex-1 px-6 pt-5 pb-5">
+        <!-- title -->
+        <a href={href}
+           class="font-bold text-xl mb-2 text-90 transition hover:text-[var(--primary)] dark:hover:text-[var(--primary)]">
+            {title}
+        </a>
+
+        <!-- description -->
+        {description && <p class="text-75 text-sm mb-4 line-clamp-3">{description}</p>}
+
+        <!-- tags -->
+        {tags.length > 0 && (
+            <div class="flex flex-wrap gap-2 mb-4">
+                {tags.map((tag) => (
+                    <span class="text-xs font-medium px-2 py-0.5 rounded-md bg-[var(--btn-regular-bg)] text-[var(--btn-content)]">
+                        {tag.trim()}
+                    </span>
+                ))}
+            </div>
+        )}
+
+        <!-- links -->
+        <div class="mt-auto flex flex-wrap gap-2">
+            {demo && (
+                <a href={demo} target="_blank" rel="noopener noreferrer"
+                   class="btn-regular rounded-lg h-9 px-3 text-sm font-medium flex items-center gap-1.5 active:scale-95">
+                    <Icon name="fa6-solid:arrow-up-right-from-square" class="text-xs" />
+                    {i18n(I18nKey.liveDemo)}
+                </a>
+            )}
+            {repo && (
+                <a href={repo} target="_blank" rel="noopener noreferrer"
+                   class="btn-plain rounded-lg h-9 px-3 text-sm font-medium flex items-center gap-1.5 active:scale-95">
+                    <Icon name="fa6-brands:github" class="text-base" />
+                    {i18n(I18nKey.sourceCode)}
+                </a>
+            )}
+        </div>
+    </div>
+</article>
